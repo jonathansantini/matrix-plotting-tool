@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Unicorn Matrix Plotter</title>
+    <style>
+        /*
+         * CSS STYLES
+         * Defines how everything looks
+         */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .color-picker-container label {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /*
+         * Color picker styling
+         * type="color" creates a native color picker
+         */
+        #colorPicker {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .current-color-display {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+        }
+
+        /*
+         * THE PIXEL GRID
+         * This is the main canvas where users draw
+         * Uses CSS Grid for perfect 32x32 layout
+         */
+        #pixelGrid {
+            display: grid;
+            grid-template-columns: repeat(32, 1fr);
+            grid-template-rows: repeat(32, 1fr);
+            gap: 1px;
+            background: #ddd;
+            padding: 1px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 640px;
+            aspect-ratio: 1; /* Keeps it square */
+            margin: 20px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /*
+         * Individual pixel styling
+         * Each pixel is a clickable div
+         */
+        .pixel {
+            background: #000;
+            cursor: crosshair;
+            transition: transform 0.1s ease;
+        }
+
+        .pixel:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 0 5px rgba(255,255,255,0.8);
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Hidden file input for import */
+        #importFile {
+            display: none;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            display: block;
+        }
+
+        .status-message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Cosmic Unicorn Matrix Plotter</h1>
+        <p class="subtitle">Design your 32x32 LED matrix patterns</p>
+
+        <!-- Status messages -->
+        <div id="statusMessage" class="status-message"></div>
+
+        <!-- Control panel -->
+        <div class="controls">
+            <div class="color-picker-container">
+                <label for="colorPicker">Color:</label>
+                <input type="color" id="colorPicker" value="#ff0000">
+                <div class="current-color-display">
+                    RGB: <span id="rgbDisplay">255, 0, 0</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-danger" onclick="clearGrid()">Clear Grid</button>
+                <button class="btn-secondary" onclick="document.getElementById('importFile').click()">Import Design</button>
+                <button class="btn-primary" onclick="exportDesign()">Export Design</button>
+            </div>
+        </div>
+
+        <!-- Hidden file input for import -->
+        <input type="file" id="importFile" accept=".txt" onchange="importDesign()">
+
+        <!-- The pixel grid (created by JavaScript) -->
+        <div id="pixelGrid"></div>
+
+        <div class="info">
+            <p>Click any pixel to paint it with the selected color</p>
+            <p>Total pixels: 1,024 (32 × 32)</p>
+        </div>
+    </div>
+
+    <script>
+        /*
+         * JAVASCRIPT CODE
+         * Handles all the interactive functionality
+         */
+
+        // Store pixel data: array of 1024 pixels, each has {r, g, b}
+        // Index 0 = top-left, index 1023 = bottom-right
+        let pixelData = [];
+
+        // Current selected color
+        let currentColor = { r: 255, g: 0, b: 0 };
+
+        /**
+         * Initialize the application
+         * Creates the 32x32 grid and sets up event listeners
+         */
+        function initGrid() {
+            const grid = document.getElementById('pixelGrid');
+
+            // Create 1024 pixels (32 * 32)
+            for (let i = 0; i < 1024; i++) {
+                // Create a div for each pixel
+                const pixel = document.createElement('div');
+                pixel.className = 'pixel';
+                pixel.dataset.index = i; // Store position
+
+                // Click handler - paint this pixel
+                pixel.addEventListener('click', function() {
+                    paintPixel(i);
+                });
+
+                grid.appendChild(pixel);
+
+                // Initialize pixel data to black (0, 0, 0)
+                pixelData[i] = { r: 0, g: 0, b: 0 };
+            }
+
+            console.log('Grid initialized with 1024 pixels');
+        }
+
+        /**
+         * Paint a pixel with current color
+         *
+         * @param {number} index - Position in grid (0-1023)
+         */
+        function paintPixel(index) {
+            // Update pixel data
+            pixelData[index] = { ...currentColor };
+
+            // Update visual display
+            const pixel = document.querySelector(`[data-index="${index}"]`);
+            pixel.style.background = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
+
+            console.log(`Painted pixel ${index} with RGB(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`);
+        }
+
+        /**
+         * Convert hex color to RGB
+         * Hex format: #RRGGBB (e.g., #FF0000 = red)
+         *
+         * @param {string} hex - Color in hex format
+         * @returns {object} RGB values {r, g, b}
+         */
+        function hexToRgb(hex) {
+            // Remove # if present
+            hex = hex.replace('#', '');
+
+            // Parse hex string to integers
+            // parseInt(str, 16) converts hex to decimal
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+
+            return { r, g, b };
+        }
+
+        /**
+         * Handle color picker change
+         */
+        document.getElementById('colorPicker').addEventListener('input', function(e) {
+            const hex = e.target.value;
+            currentColor = hexToRgb(hex);
+
+            // Update RGB display
+            document.getElementById('rgbDisplay').textContent =
+                `${currentColor.r}, ${currentColor.g}, ${currentColor.b}`;
+
+            console.log('Color changed to:', currentColor);
+        });
+
+        /**
+         * Clear all pixels (set to black)
+         */
+        function clearGrid() {
+            if (!confirm('Are you sure you want to clear the entire grid?')) {
+                return;
+            }
+
+            // Reset all pixel data to black
+            for (let i = 0; i < 1024; i++) {
+                pixelData[i] = { r: 0, g: 0, b: 0 };
+
+                // Update visual
+                const pixel = document.querySelector(`[data-index="${i}"]`);
+                pixel.style.background = 'rgb(0, 0, 0)';
+            }
+
+            showStatus('Grid cleared', 'success');
+            console.log('Grid cleared');
+        }
+
+        /**
+         * Export design to file
+         * Format: r1,g1,b1,r2,g2,b2,...
+         */
+        async function exportDesign() {
+            try {
+                // Convert pixel data to flat array
+                // [r1, g1, b1, r2, g2, b2, ...]
+                const flatArray = [];
+                for (let i = 0; i < 1024; i++) {
+                    flatArray.push(pixelData[i].r);
+                    flatArray.push(pixelData[i].g);
+                    flatArray.push(pixelData[i].b);
+                }
+
+                console.log('Exporting', flatArray.length, 'values');
+
+                // Send to backend
+                const response = await fetch('/api/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pixels: flatArray })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(`Design exported! File: ${result.filename}`, 'success');
+
+                    // Auto-download the file
+                    window.location.href = `/api/download/${result.filename}`;
+                } else {
+                    showStatus('Export failed: ' + result.error, 'error');
+                }
+
+            } catch (error) {
+                console.error('Export error:', error);
+                showStatus('Export failed: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Import design from file
+         */
+        async function importDesign() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('/api/import', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Load pixel data from file
+                    const flatArray = result.pixels;
+
+                    // Convert flat array back to pixel data
+                    for (let i = 0; i < 1024; i++) {
+                        const baseIndex = i * 3;
+                        const r = flatArray[baseIndex];
+                        const g = flatArray[baseIndex + 1];
+                        const b = flatArray[baseIndex + 2];
+
+                        pixelData[i] = { r, g, b };
+
+                        // Update visual
+                        const pixel = document.querySelector(`[data-index="${i}"]`);
+                        pixel.style.background = `rgb(${r}, ${g}, ${b})`;
+                    }
+
+                    showStatus('Design imported successfully!', 'success');
+                } else {
+                    showStatus('Import failed: ' + result.error, 'error');
+                }
+
+            } catch (error) {
+                console.error('Import error:', error);
+                showStatus('Import failed: ' + error.message, 'error');
+            }
+
+            // Reset file input
+            fileInput.value = '';
+        }
+
+        /**
+         * Show status message to user
+         */
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize grid when page loads
+        window.addEventListener('DOMContentLoaded', initGrid);
+    </script>
+</body>
+</html>

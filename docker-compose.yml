@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # Our web application service
+  web:
+    # Build from Dockerfile in current directory
+    build: .
+
+    # Container name (easier to identify)
+    container_name: matrix-plotter
+
+    # Port mapping: host:container
+    # Access app at http://localhost:5000
+    ports:
+      - "5000:5000"
+
+    # Mount volumes for live development
+    # Changes on your computer = instant changes in container
+    volumes:
+      # App code - see changes without rebuilding
+      - ./app:/app
+      # Exports folder - persist saved designs on your computer
+      - ./exports:/app/exports
+
+    # Environment variables
+    environment:
+      # Enable Flask debug mode for development
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+
+    # Restart policy - always restart if it crashes
+    restart: unless-stopped
+
+    # Override CMD for development - Flask's dev server with auto-reload
+    command: python main.py

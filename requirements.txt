@@ -1,0 +1,8 @@
+# Web framework - handles HTTP requests, routing, and serving web pages
+Flask==3.0.0
+
+# CORS support - allows frontend to communicate with backend
+flask-cors==4.0.0
+
+# WSGI server - production-grade web server (better than Flask's built-in)
+gunicorn==21.2.0
