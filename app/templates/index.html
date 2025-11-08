@@ -133,6 +133,17 @@
             box-shadow: 0 5px 15px rgba(237, 100, 166, 0.4);
         }
 
+        .btn-caution {
+            background: #ecc94b;
+            color: white;
+        }
+
+        .btn-caution:hover {
+            background: #d69e2e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(236, 201, 75, 0.4);
+        }
+
         .btn-danger {
             background: #f56565;
             color: white;
@@ -232,6 +243,7 @@
                     RGB: <span id="rgbDisplay">255, 0, 0</span>
                 </div>
                 <button class="btn-accent" onclick="fillAllGrid()">Fill All</button>
+                <button class="btn-caution" onclick="setRandomColor()">Set Random Color</button>
             </div>
 
             <div class="button-group">
@@ -351,6 +363,25 @@
 
             console.log('Color changed to:', currentColor);
         });
+
+        function setRandomColor() {
+            // Generate random RGB values
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+
+            currentColor = { r, g, b };
+
+            // Update color picker value
+            const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+            document.getElementById('colorPicker').value = hex;
+
+            // Update RGB display
+            document.getElementById('rgbDisplay').textContent =
+                `${currentColor.r}, ${currentColor.g}, ${currentColor.b}`;
+
+            console.log('Random color set to:', currentColor);
+        }
 
         /**
          * Clear all pixels (set to white)
