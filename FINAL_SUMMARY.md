@@ -213,7 +213,7 @@ docker compose up
 ```
 
 ### Accessing the App
-Open your browser to: **http://localhost:5000**
+Open your browser to: **http://localhost:5001**
 
 ### Stopping the App
 ```bash

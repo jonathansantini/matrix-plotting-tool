@@ -6,7 +6,7 @@
 docker compose up --build
 ```
 
-Open browser to: **http://localhost:5000**
+Open browser to: **http://localhost:5001**
 
 ## Use the Tool
 

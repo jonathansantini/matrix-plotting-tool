@@ -9,7 +9,7 @@ A web-based tool for designing pixel art for the Cosmic Unicorn 32x32 LED matrix
 docker compose up --build
 
 # Access the app
-# Open browser to: http://localhost:5000
+# Open browser to: http://localhost:5001
 ```
 
 ## Features

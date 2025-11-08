@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Our web application service
   web:
@@ -10,9 +8,9 @@ services:
     container_name: matrix-plotter
 
     # Port mapping: host:container
-    # Access app at http://localhost:5000
+    # Access app at http://localhost:5001
     ports:
-      - "5000:5000"
+      - "5001:5001"
 
     # Mount volumes for live development
     # Changes on your computer = instant changes in container

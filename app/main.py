@@ -150,4 +150,4 @@ def download_file(filename):
 if __name__ == '__main__':
     # host='0.0.0.0' allows access from outside container
     # debug=True enables auto-reload and better error messages
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
