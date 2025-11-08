@@ -250,6 +250,7 @@
         <div class="info">
             <p>Click any pixel to paint it with the selected color</p>
             <p>Total pixels: 1,024 (32 × 32)</p>
+            <p>Pixel count: <span id="pixelCount">0</span></p>
         </div>
     </div>
 
@@ -262,6 +263,9 @@
         // Store pixel data: array of 1024 pixels, each has {r, g, b}
         // Index 0 = top-left, index 1023 = bottom-right
         let pixelData = [];
+
+        // Default color (white)
+        const defaultColor = { r: 255, g: 255, b: 255 };
 
         // Current selected color
         let currentColor = { r: 255, g: 0, b: 0 };
@@ -288,7 +292,7 @@
                 grid.appendChild(pixel);
 
                 // Initialize pixel data to black (0, 0, 0)
-                pixelData[i] = { r: 0, g: 0, b: 0 };
+                pixelData[i] = defaultColor;
             }
 
             console.log('Grid initialized with 1024 pixels');
@@ -307,6 +311,10 @@
             const pixel = document.querySelector(`[data-index="${index}"]`);
             pixel.style.background = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
 
+            // Update pixel count
+            countPixels();
+
+            // Log action
             console.log(`Painted pixel ${index} with RGB(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`);
         }
 
@@ -345,14 +353,14 @@
         });
 
         /**
-         * Clear all pixels (set to black)
+         * Clear all pixels (set to white)
          */
         function clearGrid() {
             if (!confirm('Are you sure you want to clear the entire grid?')) {
                 return;
             }
 
-            // Reset all pixel data to black
+            // Reset all pixel data to white
             for (let i = 0; i < 1024; i++) {
                 pixelData[i] = { r: 255, g: 255, b: 255 };
 
@@ -366,8 +374,7 @@
         }
 
         /**
-         *
-         *
+         * Fill all pixels with current color
          */
         function fillAllGrid() {
             for (let i = 0; i < 1024; i++) {
@@ -375,6 +382,22 @@
                 paintPixel(i);
             }
             showStatus('Grid filled', 'success');
+        }
+
+        /**
+         * Count pixels that are not default:"
+         */
+        function countPixels() {
+            let count = 0;
+            for (let i = 0; i < 1024; i++) {
+                const p = pixelData[i];
+                if (p.r !== defaultColor.r || p.g !== defaultColor.g || p.b !== defaultColor.b) {
+                    count++;
+                }
+            }
+
+            // Update display
+            document.getElementById('pixelCount').textContent = count;
         }
 
         /**
